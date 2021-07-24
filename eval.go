@@ -64,7 +64,7 @@ func infixToRPN(input string) ([]string, error) {
 			// If the top in the stack is not an operator, pop over the corresponding function.
 			top, err := operators.Peek()
 			if err != nil {
-				return nil, err
+				continue // Don't fail if stack is empty.
 			}
 
 			if _, ok := priorities[top]; !ok {
@@ -84,10 +84,12 @@ func infixToRPN(input string) ([]string, error) {
 				}
 
 				if (priorities[top] > priority && rightAssociated[t]) ||
-					(priorities[top] <= priority && !rightAssociated[t]) {
+					(priority <= priorities[top] && !rightAssociated[t]) {
 					operators.Pop()
 					output.Enqueue(top)
 				}
+
+				break
 			}
 
 			operators.Push(t)
