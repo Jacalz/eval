@@ -2,12 +2,13 @@ package eval
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/jacalz/eval/data"
 )
+
+var errMismatchedParenthesis = errors.New("mismatched parenthesis")
 
 var priorities = map[string]int{
 	"^": 2,
@@ -32,69 +33,86 @@ func isNumeric(s string) bool {
 
 // infixToRPN converts an infix notation string to reverse polish notation using a shunting yard algorithm.
 func infixToRPN(input string) ([]string, error) {
-	outputQueue := data.NewQueue(16)
-	operatorStack := data.NewStack(16)
+	output := data.NewQueue(16)
+	operators := data.NewStack(16)
 
 	for _, t := range strings.Fields(input) {
-		fmt.Println("Queue:", outputQueue, "Stack:", operatorStack)
-
-		if isNumeric(t) {
-			outputQueue.Enqueue(t)
-		} else if t == "(" {
-			operatorStack.Push(t)
+		if t == "(" {
+			operators.Push(t)
 		} else if t == ")" {
 			foundLeftMatch := false
 
 			// Pop items from the stack to the queue until the matching parenthesis is found.
-			for len(operatorStack.Items) > 0 {
-				oper := operatorStack.Pop()
+			for len(operators.Items) > 0 {
+				oper, err := operators.Pop()
+				if err != nil {
+					return nil, err
+				}
+
 				if oper == "(" {
 					foundLeftMatch = true
 					break
 				}
 
-				outputQueue.Enqueue(oper)
+				output.Enqueue(oper)
 			}
 
 			if !foundLeftMatch {
-				return nil, errors.New("mismatched parenthesis")
+				return nil, errMismatchedParenthesis
 			}
 
-			// If the top in the queue is not an operator, pop over the corresponding function.
-			if _, ok := priorities[operatorStack.Peek()]; !ok {
-				outputQueue.Enqueue(operatorStack.Pop())
+			// If the top in the stack is not an operator, pop over the corresponding function.
+			top, err := operators.Peek()
+			if err != nil {
+				return nil, err
+			}
+
+			if _, ok := priorities[top]; !ok {
+				operators.Pop()
+				output.Enqueue(top)
 			}
 
 		} else if priority, ok := priorities[t]; ok {
-			for len(operatorStack.Items) > 0 {
-				top := operatorStack.Peek()
+			for len(operators.Items) > 0 {
+				top, err := operators.Peek()
+				if err != nil {
+					return nil, err
+				}
+
 				if top == "(" {
 					break
 				}
 
 				if (priorities[top] > priority && rightAssociated[t]) ||
 					(priorities[top] <= priority && !rightAssociated[t]) {
-					outputQueue.Enqueue(operatorStack.Pop())
+					operators.Pop()
+					output.Enqueue(top)
 				}
 			}
 
-			operatorStack.Push(t)
+			operators.Push(t)
+		} else if isNumeric(t) {
+			output.Enqueue(t)
 		} else { // Token is a function.
-			operatorStack.Push(t)
+			operators.Push(t)
 		}
 	}
 
 	// Pop remaining items from the stack to the queue.
-	for len(operatorStack.Items) > 0 {
-		oper := operatorStack.Pop()
+	for len(operators.Items) > 0 {
+		oper, err := operators.Pop()
+		if err != nil {
+			return nil, err
+		}
+
 		if oper == "(" {
 			return nil, errors.New("mismatched parenthesis")
 		}
 
-		outputQueue.Enqueue(oper)
+		output.Enqueue(oper)
 	}
 
-	return outputQueue.Items, nil
+	return output.Items, nil
 }
 
 // Eval evaluates the mathematical expression and returns the result.
