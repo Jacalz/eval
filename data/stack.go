@@ -1,5 +1,9 @@
 package data
 
+import "errors"
+
+var errEmptyStack = errors.New("stack is empty, cannot peek or pop")
+
 // Stack is a simple LIFO stack implementation.
 // NOTE: The stack is not concurrency safe.
 type Stack struct {
@@ -12,19 +16,23 @@ func (s *Stack) Push(element string) {
 }
 
 // Pop removes the top most element from the stack.
-func (s *Stack) Pop() string {
+func (s *Stack) Pop() (string, error) {
+	if len(s.Items) == 0 {
+		return "", errEmptyStack
+	}
+
 	top := s.Items[len(s.Items)-1]
 	s.Items = s.Items[:len(s.Items)-1]
-	return top
+	return top, nil
 }
 
 // Peek returns the top most element from the stack.
-func (s *Stack) Peek() string {
-	if len(s.Items) < 1 {
-		return ""
+func (s *Stack) Peek() (string, error) {
+	if len(s.Items) == 0 {
+		return "", errEmptyStack
 	}
 
-	return s.Items[len(s.Items)-1]
+	return s.Items[len(s.Items)-1], nil
 }
 
 // NewStack returns a new stack with a set inital size.

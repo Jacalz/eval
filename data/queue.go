@@ -1,5 +1,9 @@
 package data
 
+import "errors"
+
+var errEmptyQueue = errors.New("queue is empty, cannot dequeue")
+
 // Queue is a simple FIFO queue implementation.
 // NOTE: The queue is not concurrency safe.
 type Queue struct {
@@ -12,10 +16,14 @@ func (q *Queue) Enqueue(element string) {
 }
 
 // Dequeue removes the first item from the queue.
-func (q *Queue) Dequeue() string {
+func (q *Queue) Dequeue() (string, error) {
+	if len(q.Items) == 0 {
+		return "", errEmptyQueue
+	}
+
 	first := q.Items[0]
 	q.Items = q.Items[1:]
-	return first
+	return first, nil
 }
 
 // NewQueue returns a new queue with a set default size.
