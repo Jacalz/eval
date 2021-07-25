@@ -1,123 +1,53 @@
 package eval
 
 import (
-	"errors"
+	"math"
 	"strconv"
-	"strings"
-
-	"github.com/jacalz/eval/data"
 )
 
-var errMismatchedParenthesis = errors.New("mismatched parenthesis")
-
-var priorities = map[string]int{
-	"^": 2,
-	"*": 1,
-	"/": 1,
-	"+": 0,
-	"-": 0,
-}
-
-var rightAssociated = map[string]bool{
-	"^": true,
-	"*": false,
-	"/": false,
-	"+": false,
-	"-": false,
-}
-
-func isNumeric(s string) bool {
-	_, err := strconv.ParseFloat(s, 64)
-	return err == nil
-}
-
-// infixToRPN converts an infix notation string to reverse polish notation using a shunting yard algorithm.
-func infixToRPN(input string) ([]string, error) {
-	output := data.NewQueue(16)
-	operators := data.NewStack(16)
-
-	for _, t := range strings.Fields(input) {
-		if t == "(" {
-			operators.Push(t)
-		} else if t == ")" {
-			foundLeftMatch := false
-
-			// Pop items from the stack to the queue until the matching parenthesis is found.
-			for len(operators.Items) > 0 {
-				oper, err := operators.Pop()
-				if err != nil {
-					return nil, err
-				}
-
-				if oper == "(" {
-					foundLeftMatch = true
-					break
-				}
-
-				output.Enqueue(oper)
-			}
-
-			if !foundLeftMatch {
-				return nil, errMismatchedParenthesis
-			}
-
-			// If the top in the stack is not an operator, pop over the corresponding function.
-			top, err := operators.Peek()
+func evaluateRPN(tokens []string) (float64, error) {
+	stack := make([]float64, 0, 8)
+	for _, t := range tokens {
+		switch t {
+		case "+":
+			stack[len(stack)-2] += stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+		case "-":
+			stack[len(stack)-2] -= stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+		case "*":
+			stack[len(stack)-2] *= stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+		case "/":
+			stack[len(stack)-2] /= stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+		case "^":
+			stack[len(stack)-2] = math.Pow(stack[len(stack)-2], stack[len(stack)-1])
+			stack = stack[:len(stack)-1]
+		default:
+			f, err := strconv.ParseFloat(t, 64)
 			if err != nil {
-				continue // Don't fail if stack is empty.
+				return 0, err
 			}
 
-			if _, ok := priorities[top]; !ok {
-				operators.Pop()
-				output.Enqueue(top)
-			}
-
-		} else if priority, ok := priorities[t]; ok {
-			for len(operators.Items) > 0 {
-				top, err := operators.Peek()
-				if err != nil {
-					return nil, err
-				}
-
-				if top == "(" {
-					break
-				}
-
-				if (priorities[top] > priority && rightAssociated[t]) ||
-					(priority <= priorities[top] && !rightAssociated[t]) {
-					operators.Pop()
-					output.Enqueue(top)
-				}
-
-				break
-			}
-
-			operators.Push(t)
-		} else if isNumeric(t) {
-			output.Enqueue(t)
-		} else { // Token is a function.
-			operators.Push(t)
+			stack = append(stack, f)
 		}
 	}
 
-	// Pop remaining items from the stack to the queue.
-	for len(operators.Items) > 0 {
-		oper, err := operators.Pop()
-		if err != nil {
-			return nil, err
-		}
-
-		if oper == "(" {
-			return nil, errors.New("mismatched parenthesis")
-		}
-
-		output.Enqueue(oper)
-	}
-
-	return output.Items, nil
+	return stack[0], nil
 }
 
 // Eval evaluates the mathematical expression and returns the result.
-func Eval(input string) float64 {
-	return 0
+func Eval(input string) (float64, error) {
+	rpn, err := infixToRPN(input)
+	if err != nil {
+		return 0, err
+	}
+
+	result, err := evaluateRPN(rpn)
+	if err != nil {
+		return 0, err
+	}
+
+	return result, nil
 }
