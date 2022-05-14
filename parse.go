@@ -108,7 +108,7 @@ func infixToRPN(input string) ([]string, error) {
 		}
 
 		if oper == "(" {
-			return nil, errors.New("mismatched parenthesis")
+			return nil, errMismatchedParenthesis
 		}
 
 		output.Enqueue(oper)
