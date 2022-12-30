@@ -37,8 +37,8 @@ func evaluateRPN(tokens []string) (float64, error) {
 	return stack[0], nil
 }
 
-// Evaluate evaluates the mathematical expression and returns the result.
-func Evaluate(input string) (float64, error) {
+// Numerical evaluates a numerical mathematical expression and returns the result.
+func Numerical(input string) (float64, error) {
 	rpn, err := infixToRPN(input)
 	if err != nil {
 		return 0, err

@@ -2,11 +2,11 @@ package eval
 
 import "testing"
 
-func TestEvaluate_Addition(t *testing.T) {
+func TestNumerical_Addition(t *testing.T) {
 	input := "5 + 3 + 12 + -10"
 
 	expected := 10.0
-	actual, err := Evaluate(input)
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
@@ -16,11 +16,11 @@ func TestEvaluate_Addition(t *testing.T) {
 	}
 }
 
-func TestEvaluate_Subtraction(t *testing.T) {
+func TestNumerical_Subtraction(t *testing.T) {
 	input := "24 - 12 - -2"
 
 	expected := 14.0
-	actual, err := Evaluate(input)
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
@@ -30,11 +30,11 @@ func TestEvaluate_Subtraction(t *testing.T) {
 	}
 }
 
-func TestEvaluate_Multiplication(t *testing.T) {
+func TestNumerical_Multiplication(t *testing.T) {
 	input := "0.5 * 60 * 3"
 
 	expected := 90.0
-	actual, err := Evaluate(input)
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,11 +44,11 @@ func TestEvaluate_Multiplication(t *testing.T) {
 	}
 }
 
-func TestEvaluate_Division(t *testing.T) {
+func TestNumerical_Division(t *testing.T) {
 	input := "15 / 0.5 / 6"
 
 	expected := 5.0
-	actual, err := Evaluate(input)
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
@@ -58,11 +58,11 @@ func TestEvaluate_Division(t *testing.T) {
 	}
 }
 
-func TestEvaluate_Power(t *testing.T) {
+func TestNumerical_Power(t *testing.T) {
 	input := "2 ^ 3"
 
 	expected := 8.0
-	actual, err := Evaluate(input)
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,11 +72,11 @@ func TestEvaluate_Power(t *testing.T) {
 	}
 }
 
-func TestEvaluate_Parenthesis(t *testing.T) {
+func TestNumerical_Parenthesis(t *testing.T) {
 	input := "-5 + 5 * ( 7 - 2 )"
 
 	expected := 20.0
-	actual, err := Evaluate(input)
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
@@ -86,11 +86,11 @@ func TestEvaluate_Parenthesis(t *testing.T) {
 	}
 }
 
-func TestEvaluate_All(t *testing.T) {
-	input := "( 6 - 2 * ( 6 / 3 ) ) ^ 3"
+func TestNumerical_All(t *testing.T) {
+	input := "( 6 - 2 * ( 6 / 3 ) ) ^ 3 + 2"
 
-	expected := 8.0
-	actual, err := Evaluate(input)
+	expected := 10.0
+	actual, err := Numerical(input)
 	if err != nil {
 		t.Error(err)
 	}
