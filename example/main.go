@@ -16,7 +16,7 @@ func main() {
 		panic(err)
 	}
 
-	result, err := eval.Evaluate(line)
+	result, err := eval.Numerical(line)
 	if err != nil {
 		panic(err)
 	}
