@@ -10,20 +10,28 @@ import (
 
 var errMismatchedParenthesis = errors.New("mismatched parenthesis")
 
-var priorities = map[string]int{
-	"^": 2,
-	"*": 1,
-	"/": 1,
-	"+": 0,
-	"-": 0,
+func priority(token string) (int, bool) {
+	switch token {
+	case "^":
+		return 2, true
+	case "*", "/":
+		return 1, true
+	case "+", "-":
+		return 0, true
+	}
+
+	return 0, false
 }
 
-var rightAssociated = map[string]bool{
-	"^": true,
-	"*": false,
-	"/": false,
-	"+": false,
-	"-": false,
+func rightAssociated(token string) bool {
+	switch token {
+	case "^":
+		return true
+	case "*", "/", "+", "-":
+		return false
+	}
+
+	return false
 }
 
 func isNumeric(s string) bool {
@@ -67,12 +75,12 @@ func infixToRPN(input string) ([]string, error) {
 				continue // Don't fail if stack is empty.
 			}
 
-			if _, ok := priorities[top]; !ok {
+			if _, ok := priority(top); !ok {
 				operators.Pop()
 				output.Enqueue(top)
 			}
 
-		} else if priority, ok := priorities[t]; ok {
+		} else if target, ok := priority(t); ok {
 			for len(operators.Items) > 0 {
 				top, err := operators.Peek()
 				if err != nil {
@@ -83,8 +91,9 @@ func infixToRPN(input string) ([]string, error) {
 					break
 				}
 
-				if (priorities[top] > priority && rightAssociated[t]) ||
-					(priority <= priorities[top] && !rightAssociated[t]) {
+				prio, _ := priority(top)
+				if (prio > target && rightAssociated(t)) ||
+					(target <= prio && !rightAssociated(t)) {
 					operators.Pop()
 					output.Enqueue(top)
 				}
