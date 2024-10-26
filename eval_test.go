@@ -72,6 +72,20 @@ func TestNumerical_Power(t *testing.T) {
 	}
 }
 
+func TestNumerical_Modulo(t *testing.T) {
+	input := "4 % 3"
+
+	expected := 1.0
+	actual, err := Numerical(input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if actual != expected {
+		t.Errorf("Got %f, expected %f", actual, expected)
+	}
+}
+
 func TestNumerical_Parenthesis(t *testing.T) {
 	input := "-5 + 5 * ( 7 - 2 )"
 

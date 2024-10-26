@@ -24,6 +24,9 @@ func evaluateRPN(tokens []string) (float64, error) {
 		case "^":
 			stack[len(stack)-2] = math.Pow(stack[len(stack)-2], stack[len(stack)-1])
 			stack = stack[:len(stack)-1]
+		case "%":
+			stack[len(stack)-2] %= stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
 		default:
 			f, err := strconv.ParseFloat(t, 64)
 			if err != nil {

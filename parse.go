@@ -14,7 +14,7 @@ func priority(token string) (int, bool) {
 	switch token {
 	case "^":
 		return 2, true
-	case "*", "/":
+	case "*", "/", "%":
 		return 1, true
 	case "+", "-":
 		return 0, true
@@ -27,7 +27,7 @@ func rightAssociated(token string) bool {
 	switch token {
 	case "^":
 		return true
-	case "*", "/", "+", "-":
+	case "*", "/", "%", "+", "-":
 		return false
 	}
 
