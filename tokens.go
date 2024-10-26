@@ -8,7 +8,7 @@ func splitIntoTokens(expression string) []string {
 	start := 0
 	for i, char := range expression {
 		switch char {
-		case '+', '-', '*', '/', '^', '(', ')':
+		case '+', '-', '*', '/', '^', '%', '(', ')':
 			token := strings.TrimSpace(expression[start:i])
 			if token != "" {
 				tokens = append(tokens, token, string(char))
